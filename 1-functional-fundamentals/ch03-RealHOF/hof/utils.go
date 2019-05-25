@@ -17,6 +17,13 @@ func PrintCars(title string, cars Collection) {
 	}
 }
 
+func PrintCars2(title string, cars CarCollection) {
+	log.Printf("\n%s\n%s\n", title, DASHES)
+	for _, car := range cars {
+		log.Printf("car: %v\n", car)
+	}
+}
+
 func CsvToStruct(fileName string) Collection {
 	/*
 		pwd, err := filepath.Abs(filepath.Dir(os.Args[0]))
@@ -59,5 +66,14 @@ func GetMake(sentence string) string {
 		ret = sentence[:(posSpace)]
 	}
 	//fmt.Println(ret)
+	return ret
+}
+
+func GetModel(sentence string) string {
+	ret := sentence
+	posSpace := s.Index(sentence, " ")
+	if posSpace >= 0 {
+		ret = sentence[posSpace:]
+	}
 	return ret
 }

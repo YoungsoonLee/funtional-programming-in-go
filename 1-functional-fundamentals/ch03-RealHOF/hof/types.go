@@ -14,3 +14,12 @@ type Payload struct {
 }
 
 type MapFunc func(string) string
+
+type ReducerFunc func(string, Collection) Collection
+type ReducerFunc2 func(string, CarCollection) CarCollection
+
+type CarCollection []CarType
+type CarType struct {
+	Make  string `json:"make"`
+	Model string `json:"model"`
+}

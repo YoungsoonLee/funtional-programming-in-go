@@ -42,6 +42,20 @@ func main() {
 				Filter(hof.ByForegin()).
 				Map(hof.Upgrade()),
 		)
+
+		hof.PrintCars("Filter Honda, Reduce JSON",
+			cars.Filter(hof.ByMake("Honda")).Reduce(hof.JsonReducer(cars), hof.Collection{}),
+		)
+
+		/*
+			hof.PrintCars2("Reduce - Lexus",
+				cars.Filter(hof.ByMake("Lexus")).Reduce2(hof.CarTypeReducer(cars), hof.[]CarType{}),
+			)
+		*/
+
+		hof.PrintCars2("Reduce - Lexus",
+			cars.Filter(hof.ByMake("Lexus")).Reduce2(hof.CarTypeReducer(cars), []hof.CarType{}),
+		)
 	}
 
 }

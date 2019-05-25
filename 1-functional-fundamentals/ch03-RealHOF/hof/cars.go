@@ -1,7 +1,9 @@
 package hof
 
 import (
+	"encoding/json"
 	"fmt"
+	"log"
 	"regexp"
 	s "strings"
 )
@@ -97,4 +99,42 @@ func UpgradeLabel(car string) string {
 		"Ford":   "XL",
 		"GM":     "X",
 	}[GetMake(car)]
+}
+
+func (cars Collection) Reduce(fn ReducerFunc, accumulator Collection) Collection {
+	var result = accumulator
+	for _, car := range cars {
+		result = append(fn(car, result))
+	}
+	return result
+}
+
+func (cars Collection) Reduce2(fn ReducerFunc2, accumulator CarCollection) CarCollection {
+	var result = accumulator
+	for _, car := range cars {
+		result = append(fn(car, result))
+	}
+	return result
+}
+
+func JsonReducer(cars Collection) ReducerFunc {
+	return func(car string, cars Collection) Collection {
+		JSON := fmt.Sprintf("{\"car\": {\"make\": \"%s\", \"model\": \"%s\"}}", GetMake(car), GetModel(car))
+		cars = append(cars, JSON)
+		return cars
+	}
+}
+
+func CarTypeReducer(cars Collection) ReducerFunc2 {
+
+	return func(car string, cars CarCollection) CarCollection {
+		JSON := fmt.Sprintf("{\"make\": \"%s\", \"model\": \"%s\"}", GetMake(car), GetModel(car))
+		var c CarType
+		err := json.Unmarshal([]byte(JSON), &c)
+		if err != nil {
+			log.Fatal("ERROR:", err)
+		}
+		cars = append(cars, c)
+		return cars
+	}
 }
