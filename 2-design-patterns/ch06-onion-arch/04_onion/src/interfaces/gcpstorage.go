@@ -25,3 +25,8 @@ func NewSourceBucketRepo(gcpHandendlers map[string]GcpHandler) *SourceBucketRepo
 	bucketRepo.gcpHandler = gcpHandendlers["SourceBucketRepo"]
 	return bucketRepo
 }
+
+func (repo *SourceBucketRepo) List(projectID string) (buckets []domain.Bucket, err error) {
+	// return repo.gcpHandler.ListBuckets(domain.SourceFlow)
+	return nil, nil // TODO:
+}

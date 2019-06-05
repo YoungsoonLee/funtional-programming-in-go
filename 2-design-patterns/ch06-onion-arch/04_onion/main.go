@@ -34,3 +34,8 @@ func main() {
 	wsh.GcpInteractor = gcpi
 	wsh.LocalInteractor = li
 }
+
+type endpoint struct {
+	Api
+	urlExample string
+}
