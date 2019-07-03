@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 
 	gc "github.com/go-goodies/go_currency"
 )
@@ -20,6 +21,10 @@ type LineItem struct {
 	Description string
 	Count       int
 	PriceUSD    gc.USD
+}
+
+type Filterer interface {
+	Filter(input chan Order) chan Order
 }
 
 func GetOrders() []*Order {
@@ -84,6 +89,7 @@ func main() {
 		}
 	*/
 
+	/* use channel
 	input := make(chan Order)
 	output := make(chan Order)
 
@@ -98,4 +104,81 @@ func main() {
 		fmt.Printf("Processed order: %v\n", Pipeline(*order))
 	}
 	close(input)
+	*/
+
+	/* use buffer */
+	/*
+		orders := GetOrders()
+		numberOfOrders := len(orders)
+
+		input := make(chan Order, numberOfOrders)
+		output := make(chan Order, numberOfOrders)
+
+		for i := 0; i < numberOfOrders; i++ {
+			go func() {
+				for order := range input {
+					output <- Pipeline(order)
+				}
+			}()
+		}
+
+		for _, order := range orders {
+			input <- *order
+		}
+		close(input)
+
+		for i := 0; i < numberOfOrders; i++ {
+			fmt.Println("The result is: ", <-output)
+		}
+	*/
+
+	pipeline := BuildPipeline(Authenticate{}, Decrypt{}, Charge{})
+
+	go func() {
+		orders := GetOrders()
+		for _, order := range orders {
+			fmt.Printf("order: %v\n", order)
+			pipeline.Send(*order)
+		}
+		log.Println("Close Pipeline")
+		pipeline.Close()
+	}()
+
+	pipeline.Receive(func(o Order) {
+		log.Printf("Received: %v", o)
+	})
+
+}
+
+func BuildPipeline(filters ...Filterer) Filter {
+	source := make(chan Order)
+	var nextFilter chan Order
+	for _, filter := range filters {
+		if nextFilter == nil {
+			nextFilter = filter.Filter(source)
+		} else {
+			nextFilter = filter.Filter(nextFilter)
+		}
+	}
+
+	return Filter{input: source, output: nextFilter}
+}
+
+type Filter struct {
+	input  chan Order
+	output chan Order
+}
+
+func (f *Filter) Send(order Order) {
+	f.input <- order
+}
+
+func (f *Filter) Receive(callback func(Order)) {
+	for o := range f.output {
+		callback(o)
+	}
+}
+
+func (f *Filter) Close() {
+	close(f.input)
 }
